@@ -84,7 +84,7 @@ cd frontend
 npm install
 npm start
 
-The application should now be running on http://localhost:3000.
+The application should now be running on https://g.co/gemini/share/419ed7e977bd.
 
 📖 How to Use
 Simply open the web interface and type your health-related question into the chatbox. The chatbot will process your query and provide a response based on its knowledge base.
