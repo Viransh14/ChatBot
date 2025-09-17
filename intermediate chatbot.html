@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellnessWhiz - AI Public Health Assistant (Fixed)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f7f7; background-image: radial-gradient(circle at 100% 0, rgba(118, 209, 215, 0.2) 0%, transparent 30%), radial-gradient(circle at 0 100%, rgba(100, 160, 255, 0.2) 0%, transparent 30%); min-height: 100vh; padding: 0.5rem; }
+        .glass-container { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(209, 213, 219, 0.3); }
+        #chat-container::-webkit-scrollbar { width: 6px; }
+        #chat-container::-webkit-scrollbar-track { background: transparent; }
+        #chat-container::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 3px; }
+        #chat-container::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        .message-anim { animation: messagePopIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        @keyframes messagePopIn { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .feature-btn { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; gap: 0.5rem; padding: 8px 16px; border-radius: 9999px; font-size: 14px; font-weight: 500; border: 1px solid #d1d5db; white-space: nowrap; background-color: #ffffff80; }
+        .feature-btn:not(.active):hover { transform: translateY(-2px); box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.05); border-color: #c4b5fd; }
+        .feature-btn.active { background-image: linear-gradient(to right, #4f46e5, #7c3aed); color: white; border-color: transparent; box-shadow: 0 6px 12px -3px rgba(79, 70, 229, 0.4), 0 4px 8px -2px rgba(79, 70, 229, 0.3); transform: translateY(-2px); }
+        .sos-btn { background-image: linear-gradient(to right, #ef4444, #dc2626); color: white; animation: pulse-red 2s infinite; box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+        @keyframes pulse-red { 70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } }
+        .loader { display: flex; align-items: center; }
+        .bar { display: inline-block; width: 4px; height: 18px; background-color: rgba(79, 70, 229, 0.8); border-radius: 10px; animation: scale-up 1s linear infinite; }
+        .bar:nth-child(2) { animation-delay: 0.2s; }
+        .bar:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes scale-up { 20% { background-color: rgba(129, 140, 248, 1); transform: scaleY(1.5); } 40% { transform: scaleY(1); } }
+        #mic-btn.recording { background-image: linear-gradient(to right, #f87171, #ef4444); color: white; animation: pulse 1.5s infinite; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        @keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
+    </style>
+</head>
+
+<body class="flex items-center justify-center">
+    <div class="glass-container w-full max-w-2xl mx-auto rounded-2xl shadow-2xl flex flex-col h-[98vh] sm:h-[95vh]">
+
+        <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-t-2xl shadow-lg z-10">
+            <div class="flex items-center justify-center space-x-4">
+                <div class="p-2 bg-white/20 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide" style="text-shadow: 0 2px 4px rgba(0,0,0,0.2);">WellnessWhiz</h1>
+                    <p class="text-sm text-indigo-100">Your AI Public Health Assistant</p>
+                </div>
+            </div>
+        </header>
+
+        <main id="chat-container" class="flex-1 p-6 overflow-y-auto space-y-6"></main>
+
+        <div id="loading" class="hidden px-6 pb-2">
+            <div class="flex items-center justify-start space-x-3">
+                <div class="loader">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <span class="text-sm font-medium text-gray-500">WellnessWhiz is thinking...</span>
+            </div>
+        </div>
+
+        <footer class="p-4 border-t border-gray-200/60 bg-white/30 rounded-b-2xl">
+            <div id="category-selection" class="px-1 pb-3 flex flex-wrap justify-center items-center gap-2 border-b border-gray-200/80">
+                <button data-category="disease" class="feature-btn">Disease Info</button>
+                <button data-category="doctor" class="feature-btn">Find a Doctor 👨‍⚕️</button>
+                <button data-category="emotion" class="feature-btn">Emotional Wellness</button>
+                <button id="sos-btn" class="feature-btn sos-btn">SOS</button>
+            </div>
+
+            <div id="feature-toggles" class="hidden px-1 pb-3 flex-wrap justify-center items-center gap-2 border-b border-gray-200/80">
+                <button data-mode="symptoms" data-category="disease" class="feature-btn">Symptoms ✨</button>
+                <button data-mode="drug" data-category="disease" class="feature-btn">Drug Info 💊</button>
+                <button data-mode="disease" data-category="disease" class="feature-btn">Disease Stats 📊</button>
+                <button data-mode="firstaid" data-category="disease" class="feature-btn">First-Aid Helper</button>
+                <button data-mode="findDoctor" data-category="doctor" class="feature-btn">Find a Doctor 👨‍⚕️</button>
+                <button data-mode="meal" data-category="emotion" class="feature-btn">Meal Ideas 🍲</button>
+                <button data-mode="emotionalsupport" data-category="emotion" class="feature-btn">Emotional Support 🤗</button>
+                <button id="back-btn" class="feature-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Back
+                </button>
+            </div>
+
+            <form id="chat-form" class="flex items-center space-x-3 pt-2">
+                <input type="text" id="user-input" placeholder="Select a category to begin..." class="flex-1 w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 bg-white/80" autocomplete="off">
+                <button type="button" id="mic-btn" class="bg-white text-gray-700 rounded-xl p-3 font-semibold hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-mic"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                </button>
+                <button type="submit" class="bg-indigo-600 text-white rounded-xl p-3 font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105 active:scale-95 disabled:bg-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+
+            <p class="text-xs text-gray-500 mt-3 text-center"><span class="font-bold">Disclaimer:</span> WellnessWhiz is an AI assistant and not a substitute for professional medical advice.</p>
+        </footer>
+    </div>
+
+    <script>
+        // ---------- Configuration ----------
+        // Your Google Generative API key (provided). Note: exposing an API key in client-side code is fine for prototyping but not for production.
+        const API_KEY = "AIzaSyCMocg3np0McjnpXE35PKobdEp71fxHWOg";
+        const MODEL_NAME = "gemini-2.0-flash"; // use a supported model name
+
+        // ---------- UI elements ----------
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const loadingIndicator = document.getElementById('loading');
+        const submitButton = chatForm.querySelector('button[type="submit"]');
+        const micBtn = document.getElementById('mic-btn');
+        const categorySelection = document.getElementById('category-selection');
+        const featureToggles = document.getElementById('feature-toggles');
+        const backBtn = document.getElementById('back-btn');
+        const sosBtn = document.getElementById('sos-btn');
+        const featureBtns = document.querySelectorAll('#feature-toggles .feature-btn');
+
+        // ---------- State ----------
+        let conversationHistory = [];
+        let currentMode = null;
+        let isRecording = false; // <--- fixed: define isRecording to avoid ReferenceError
+
+        const placeholders = {
+            symptoms: "Enter symptoms like 'fever, headache, sore throat'...",
+            drug: "Enter a drug name, e.g., 'Ibuprofen' or 'Lisinopril'...",
+            disease: "Enter a disease name, e.g., 'Dengue' or 'Tuberculosis'...",
+            firstaid: "Describe a minor issue like 'small cut on finger'...",
+            findDoctor: "Enter specialty & location, e.g., 'Cardiologist in Chennai'",
+            meal: "List ingredients like 'chicken, rice, broccoli'...",
+            emotionalsupport: "How are you feeling today? Talk about what's on your mind...",
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            featureBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            userInput.placeholder = placeholders[mode] || "Type your question...";
+            userInput.focus();
+        }
+
+        // Attach mode clicks
+        featureBtns.forEach(btn => {
+            if (btn.id !== 'back-btn') {
+                btn.addEventListener('click', () => setMode(btn.dataset.mode));
+            }
+        });
+
+        categorySelection.addEventListener('click', (e) => {
+            const categoryBtn = e.target.closest('button[data-category]');
+            if (!categoryBtn) return;
+
+            const category = categoryBtn.dataset.category;
+            categorySelection.classList.add('hidden');
+            featureToggles.classList.remove('hidden');
+            featureToggles.classList.add('flex');
+
+            let visibleButtonCount = 0;
+            featureBtns.forEach(btn => {
+                const isVisible = btn.dataset.category === category || btn.id === 'back-btn';
+                btn.style.display = isVisible ? 'flex' : 'none';
+                if (isVisible && btn.id !== 'back-btn') visibleButtonCount++;
+            });
+
+            if (visibleButtonCount === 1) {
+                const visibleBtn = document.querySelector('#feature-toggles .feature-btn[data-category="' + category + '"]');
+                if (visibleBtn) setMode(visibleBtn.dataset.mode);
+            } else {
+                userInput.placeholder = "Please select an option above...";
+            }
+        });
+
+        sosBtn.addEventListener('click', () => {
+            const sosMessage = {
+                role: 'model',
+                parts: [{ text: `**IF THIS IS A MEDICAL EMERGENCY, PLEASE CALL THESE NUMBERS IMMEDIATELY.**\n\n**Comprehensive Emergency Service (Ambulance, Fire, Police):** 108\n**National Emergency Number:** 112\n**Tamil Nadu Health Helpline:** 104\n**Police:** 100\n\nThese services are for genuine emergencies.` }]
+            };
+            conversationHistory.push(sosMessage);
+            renderConversation();
+        });
+
+        backBtn.addEventListener('click', () => {
+            featureToggles.classList.add('hidden');
+            featureToggles.classList.remove('flex');
+            categorySelection.classList.remove('hidden');
+            userInput.placeholder = "Select a category to begin...";
+            currentMode = null;
+            featureBtns.forEach(btn => btn.classList.remove('active'));
+        });
+
+        function renderConversation() {
+            chatContainer.innerHTML = '';
+            conversationHistory.forEach((message) => {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.classList.add('flex', 'flex-col', 'message-anim');
+
+                if (message.role === 'user') {
+                    messageWrapper.classList.add('items-end');
+                    messageWrapper.innerHTML = `<div class="bg-gradient-to-br from-indigo-600 to-purple-600 text-white p-3 rounded-xl max-w-xl shadow-md"><p>${escapeHtml(message.parts[0].text)}</p></div>`;
+                } else if (message.role === 'model') {
+                    messageWrapper.classList.add('items-start');
+                    // keep simple markdown bold and newline -> <br>
+                    const raw = message.parts[0].text || '';
+                    const escaped = escapeHtml(raw).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                    messageWrapper.innerHTML = `
+                        <div class="bg-white text-gray-800 p-4 rounded-xl max-w-xl shadow-md w-full"><p>${escaped}</p></div>
+                    `;
+                }
+                chatContainer.appendChild(messageWrapper);
+            });
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // ---------- Gemini API call (fixed payload and parsing) ----------
+        async function callGeminiAPI(userQuery) {
+            if (!currentMode) {
+                conversationHistory.push({ role: "model", parts: [{ text: "Please select a feature before asking a question." }] });
+                renderConversation();
+                return;
+            }
+
+            loadingIndicator.classList.remove('hidden');
+            submitButton.disabled = true; userInput.disabled = true; featureBtns.forEach(b => b.disabled = true); micBtn.disabled = true;
+
+            conversationHistory.push({ role: 'user', parts: [{ text: userQuery }] });
+            renderConversation();
+
+            // Build system instruction + user content using the documented 'contents[].parts[].text' format
+            const basePrompt = `SYSTEM PROMPT: You are \"WellnessWhiz\", an AI Public Health Assistant for users in India. Rules:\n1. Be helpful, empathetic, and reassuring.\n2. Explain medical concepts in simple terms.\n3. End every response with this exact disclaimer: "**Disclaimer**: This information is for educational purposes only. Consult with a qualified healthcare professional for any medical advice, diagnosis, or treatment."\n4. Do NOT provide a specific medical diagnosis or prescribe medication.`;
+
+            let instructedQuery = '';
+
+            switch (currentMode) {
+                case 'symptoms':
+                    instructedQuery = `YOUR CURRENT TASK: Act as a symptom analyzer. Provide potential general health areas that might be related. Strongly recommend consulting a doctor. USER'S SYMPTOMS: "${userQuery}"`;
+                    break;
+                case 'drug':
+                    instructedQuery = `YOUR CURRENT TASK: Summarize the drug's purpose, warnings, and common Indian brand names if known. USER'S QUERY: "${userQuery}"`;
+                    break;
+                case 'disease':
+                    instructedQuery = `YOUR CURRENT TASK: Summarize key information about the disease and high-level statistics where appropriate. USER'S QUERY: "${userQuery}"`;
+                    break;
+                case 'firstaid':
+                    instructedQuery = `YOUR CURRENT TASK: Provide simple step-by-step first-aid instructions and clearly state when to seek professional help. USER'S SITUATION: "${userQuery}"`;
+                    break;
+                case 'findDoctor':
+                    instructedQuery = `YOUR CURRENT TASK: Provide a clear list of nearby doctors/clinics for the specialty & location provided. If you cannot find exact matches, be explicit about that. USER'S QUERY: "${userQuery}"`;
+                    break;
+                case 'meal':
+                    instructedQuery = `YOUR CURRENT TASK: Suggest 2-3 simple, healthy meal ideas using the provided ingredients. USER'S INGREDIENTS: "${userQuery}"`;
+                    break;
+                case 'emotionalsupport':
+                    instructedQuery = `YOUR CURRENT TASK: Provide empathetic, supportive, non-clinical emotional support. USER'S FEELINGS: "${userQuery}"`;
+                    break;
+                default:
+                    instructedQuery = `Answer the user's general health question: "${userQuery}"`;
+                    break;
+            }
+
+            // Correct payload structure per the Gemini/Generative API docs: contents -> parts -> text
+            const payload = {
+                systemInstruction: { parts: [{ text: basePrompt }] },
+                contents: [{ parts: [{ text: instructedQuery }] }]
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error Response:', errorText);
+                    throw new Error(`API error: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                console.log('Gemini result:', result);
+
+                // Parse response: candidates[].content.parts[].text (join multiple parts if present)
+                let responseText = '';
+                if (result.candidates && result.candidates.length > 0) {
+                    responseText = result.candidates.map(cand => (cand.content && cand.content.parts ? cand.content.parts.map(p => p.text || '').join(' ') : '')).join('\n\n');
+                } else if (result.output) {
+                    // fallback for different SDK shapes
+                    responseText = result.output?.[0]?.text || JSON.stringify(result);
+                } else {
+                    responseText = 'No reply from the model.';
+                }
+
+                // Ensure the required disclaimer is present (the system instruction should make the model include it, but add it if missing)
+                const disclaimer = "\n\n**Disclaimer**: This information is for educational purposes only. Consult with a qualified healthcare professional for any medical advice, diagnosis, or treatment.";
+                if (!/Disclaimer/i.test(responseText)) responseText = responseText.trim() + disclaimer;
+
+                conversationHistory.push({ role: 'model', parts: [{ text: responseText }] });
+
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                conversationHistory.push({ role: 'model', parts: [{ text: `I'm having trouble connecting to the AI service: ${error.message}` }] });
+            } finally {
+                loadingIndicator.classList.add('hidden'); submitButton.disabled = false; userInput.disabled = false; featureBtns.forEach(b => b.disabled = false); micBtn.disabled = false;
+                renderConversation();
+            }
+        }
+
+        // ---------- Form submit ----------
+        chatForm.addEventListener('submit', (e) => { e.preventDefault(); const q = userInput.value.trim(); if (q) { userInput.value = ''; callGeminiAPI(q); } });
+
+        // ---------- Speech recognition (fixed isRecording usage) ----------
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false; recognition.lang = 'en-IN'; recognition.interimResults = false;
+
+            micBtn.addEventListener('click', () => {
+                try {
+                    if (isRecording) recognition.stop(); else recognition.start();
+                } catch (err) { console.error('Speech start/stop error:', err); }
+            });
+
+            recognition.onstart = () => { isRecording = true; micBtn.classList.add('recording'); userInput.placeholder = "Listening..."; };
+            recognition.onend = () => { isRecording = false; micBtn.classList.remove('recording'); userInput.placeholder = placeholders[currentMode] || "Select a category to begin..."; };
+            recognition.onresult = (event) => { const transcript = event.results[0][0].transcript.trim(); userInput.value = transcript; if (transcript) { callGeminiAPI(transcript); } };
+            recognition.onerror = (event) => { console.error('Speech recognition error:', event.error); userInput.placeholder = "Mic error. Please try again."; };
+        } else {
+            console.log('Speech Recognition not supported in this browser.'); micBtn.style.display = 'none';
+        }
+
+        // ---------- Startup ----------
+        window.onload = () => {
+            userInput.placeholder = "Select a category to begin...";
+            conversationHistory.push({ role: 'model', parts: [{ text: "Hello! I'm WellnessWhiz. Please select a category below to get started. How can I assist you today?" }] });
+            renderConversation();
+        };
+    </script>
+</body>
+
+</html>
