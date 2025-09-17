@@ -84,7 +84,7 @@ cd frontend
 npm install
 npm start
 
-The application should now be running on https://g.co/gemini/share/419ed7e977bd.
+The application should now be running on file:///C:/Users/viran/OneDrive%20-%20vit.ac.in/Desktop/ise%20daAL/index9.html.
 
 📖 How to Use
 Simply open the web interface and type your health-related question into the chatbox. The chatbot will process your query and provide a response based on its knowledge base.
