@@ -1,108 +1,62 @@
 # ChatBot
-AI-Driven Public Health Chatbot for Disease Awareness:
-💡 Introduction
-This project is an AI-powered chatbot developed for the DATAQUEST 2.0 Hackathon. Its primary goal is to combat health misinformation and provide accessible, accurate, and personalized public health information.
+WellnessWhiz – AI Public Health Assistant 🤖💡
 
-😟 The Problem
-A major challenge in public health is the widespread lack of access to reliable and up-to-date health information. This issue is magnified during disease outbreaks by a surge of misinformation, which can lead to public confusion, panic, and actions that worsen the spread of illness.
+This is a simple web-based chatbot built with HTML, TailwindCSS, and JavaScript.
+It is designed as a public health assistant to provide quick responses and engage in meaningful conversations with users.
 
-Current health resources often have several limitations:
+🚀 Features
 
-Difficult to Navigate: Information can be scattered and complex for the average person to understand.
+Clean and responsive UI with TailwindCSS
 
-Limited Availability: They are not always available 24/7 for immediate concerns.
+Floating chatbot interface
 
-Lack of Personalization: They cannot provide tailored guidance based on individual symptoms or questions.
+AI-powered conversation flow
 
-This gap can lead to delayed or inappropriate care-seeking, placing a significant strain on healthcare systems.
+Easy to customize and extend
 
-✨ Our Solution
-To address these challenges, we have developed an AI-driven chatbot that serves as a reliable, first-line source of health information. Our solution is built on the following principles:
+📂 Project Structure
+├── intermediate chatbot.html   # Main HTML file
 
-Collect Accurate Data: We gather health information exclusively from trusted and verified sources, such as the World Health Organization (WHO) and the Centers for Disease Control and Prevention (CDC).
+⚙️ Setup & Usage
 
-Build an Intelligent AI Model: The core of our chatbot is an AI model trained on the collected data. It is designed to understand natural language questions and provide clear, correct answers.
-
-Develop a Comprehensive Knowledge Base: We created a structured knowledge base that maps symptoms to potential diseases and recommends appropriate actions, guiding the chatbot's responses and ensuring the information is actionable.
-
-Create a User-Friendly Interface: The chatbot is accessible through a simple and intuitive chat interface, making it easy for anyone to ask questions and receive instant answers.
-
-Deploy and Monitor: The chatbot is designed for continuous monitoring and improvement to ensure its accuracy and helpfulness over time.
-
-🚀 Key Features
-24/7 Availability: Get health information anytime, anywhere.
-
-Symptom Checker: Describe your symptoms and get information about potential conditions.
-
-Disease Information: Ask about specific diseases, their symptoms, prevention methods, and treatment options.
-
-Misinformation Debunking: Verify rumors and get facts from reliable sources.
-
-Personalized Guidance: Receive tailored advice based on your queries.
-
-User-Friendly: Simple and intuitive chat interface requires no technical skills.
-
-🛠️ Technology Stack
-Backend: Python, Flask
-
-AI/ML: Scikit-learn, TensorFlow/PyTorch, NLTK
-
-Database: Vector Database (e.g., Pinecone, ChromaDB) for knowledge retrieval
-
-Frontend: HTML, CSS, JavaScript
-
-Deployment: Docker, AWS/Google Cloud/Azure
-
-⚙️ Getting Started
-Prerequisites
-Python 3.8+
-
-pip & virtualenv
-
-Node.js & npm (for frontend development)
-
-Installation & Setup
 Clone the repository:
 
-git clone [https://github.com/your-username/health-chatbot.git](https://github.com/your-username/health-chatbot.git)
-cd health-chatbot
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
 
-Set up the backend:
 
-python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-pip install -r requirements.txt
+Open the intermediate chatbot.html file in your browser.
 
-Run the backend server:
+Start chatting with the AI assistant!
 
-python app.py
+🔑 API Key Integration
 
-Set up and run the frontend:
+This chatbot can be connected to APIs (like Gemini, OpenAI, or custom endpoints).
 
-# Open a new terminal
-cd frontend
-npm install
-npm start
+Replace the placeholder API key in the <script> section of intermediate chatbot.html.
 
-The application should now be running on file:///C:/Users/viran/OneDrive%20-%20vit.ac.in/Desktop/ise%20daAL/index9.html.
+Example:
 
-📖 How to Use
-Simply open the web interface and type your health-related question into the chatbox. The chatbot will process your query and provide a response based on its knowledge base.
+const API_KEY = "your_api_key_here";
 
-Example questions:
 
-"What are the main symptoms of the flu?"
+Make sure to keep your key private (don’t expose it in public repos).
 
-"How can I prevent catching a cold?"
+🛠️ Customization
 
-"Is it true that gargling salt water cures a sore throat?"
+Edit styles directly in the HTML (TailwindCSS is included via CDN).
 
-📚 Data Sources
-All the information provided by this chatbot is sourced from globally recognized and trusted public health organizations to ensure accuracy and reliability.
+Modify chatbot logic in the <script> section.
 
-World Health Organization (WHO)
+You can connect it with any backend or ML model for smarter responses.
 
-Centers for Disease Control and Prevention (CDC)
+🤝 Contributing
+
+Pull requests are welcome! Feel free to fork and improve the project.
+
+📜 License
+
+This project is licensed under the MIT License – you’re free to use and modify it.
 
 🏆 Hackathon
 This project was created for DATAQUEST 2.0, under the "MedTech / Biotech / Health Tech" theme.
