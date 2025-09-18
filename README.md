@@ -39,7 +39,7 @@ Phase 2 – Deepening Patient Integration
 📚 Personalized health education
 🗓️ Appointment scheduling & prescription automation
 
-Our website can be viewed on: https://health-ai-assistant-copy-612ebab4.base44.app
+Our website can be viewed on: https://health-ai-assistant-copy-d1c956c4.base44.app
 
 📊 Projected Impact
 70% – Increase in public health literacy & confidence.
